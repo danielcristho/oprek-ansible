@@ -1,2 +1,1 @@
-# oprek-ansible
-Long Journey to Learn Ansible
+# Oprek Ansible
