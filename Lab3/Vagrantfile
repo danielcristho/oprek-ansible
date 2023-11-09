@@ -5,14 +5,31 @@
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
 # you're doing.
-Vagrant.configure("2") do |config|
+
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # The most common configuration options are documented and commented below.
   # For a complete reference, please see the online documentation at
   # https://docs.vagrantup.com.
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "geerling/rocky"
+  config.vm.box = "geerlingguy/rockylinux8"
+  config.vm.hostname = "nodejs.test"
+  config.vm.network :private_network, ip: "192.168.1.10"
+  config.ssh.insert_key = false
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  config.vm.provider :virtualbox do |v|
+    v.memory = 512
+  end
+
+  # Ansible Provisioning
+  config.vm.provision :ansible do |ansible|
+    ansible.playbook = "provisioning/playbook.yml"
+  end
+end
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
