@@ -8,7 +8,6 @@
 
 VAGRANTFILE_API_VERSION = "2"
 
-
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # The most common configuration options are documented and commented below.
   # For a complete reference, please see the online documentation at
@@ -17,7 +16,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "geerlingguy/ubuntu2004"
   config.vm.network :private_network, ip: "192.168.1.10"
-  config.vm.hostname = "drupal.test"
+  config.vm.hostname = "solr.test"
   config.ssh.insert_key = false
 
   config.vm.provider :virtualbox do |v|
@@ -25,7 +24,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.memory = 512
   end
 
-  # Ansible provisioner.
+  # Ansible provision.
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "provisioning/playbook.yml"
   end
