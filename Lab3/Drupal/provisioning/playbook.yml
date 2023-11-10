@@ -1,6 +1,6 @@
 ---
 
-- name: Setup Drupal (LAMP)
+- name: Setup Drupal (LAMP).
   hosts: all
   become: true
 
