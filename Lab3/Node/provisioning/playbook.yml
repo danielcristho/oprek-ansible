@@ -41,9 +41,9 @@
     - name: Install app dependencies defined in package.json.
       community.general.npm: "path={{ node_apps_location }}/app"
     - name: Check list of running Node.js apps.
-      command: /usr/local/bin/forever list
+      ansible.builtin.command: /usr/local/bin/forever list
       register: forever_list
       changed_when: false
     - name: Start example Node.js app.
-      command: "/usr/local/bin/forever start {{ node_apps_location }}/app/app.js"
+      ansible.builtin.command: "/usr/local/bin/forever start {{ node_apps_location }}/app/app.js"
       when: "forever_list.stdout.find(node_apps_location + '/app/app.js') == -1"
