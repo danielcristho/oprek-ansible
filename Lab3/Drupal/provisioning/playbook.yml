@@ -14,7 +14,7 @@
         cache_valid_time: 3600
 
   handlers:
-    - name: Restarted Apache
+    - name: Restarted Apache.
       ansible.builtin.service:
         name: apache2
         state: restarted
@@ -27,7 +27,12 @@
           - python3-apt
           - python3-pycurl
 
-    - name: Add ondrej repository for latest PHP version.
+    - name: Add PHP repository
+      ansible.builtin.apt_repository:
+        repo: "ppa:ondrej/php"
+        state: present
+
+    - name: Install PHP & many dependencies.
       ansible.builtin.apt:
         name:
           - acl
@@ -71,7 +76,7 @@
       community.general.apache2_module:
         name: rewrite
         state: present
-      notify: restart apache
+      notify: Restarted Apache.
 
     - name: Add Apache virtualhost for Drupal.
       ansible.builtin.template:
@@ -80,13 +85,13 @@
         owner: root
         group: root
         mode: '0644'
-      notify: restart apache
+      notify: Restarted Apache.
 
     - name: Enable the Drupal site.
       ansible.builtin.command: >
         a2ensite {{ domain }}.test
         creates=/etc/apache2/sites-enabled/{{ domain }}.test.conf
-      notify: restart apache
+      notify: Restarted Apache.
 
     - name: Adjust OpCache memory setting.
       ansible.builtin.lineinfile:
@@ -94,10 +99,12 @@
         regexp: "^opcache.memory_consumption"
         line: "opcache.memory_consumption = 96"
         state: present
-      notify: restart apache
+      notify: Restarted Apache.
 
-    - name: Create a MySQL database for Drupal.
-      community.mysql.mysql_db: "db={{ domain }} state=present"
+    - name: Create Database
+      community.mysql.mysql_db:
+        name: '{{ domain }}'
+        state: present
 
     - name: Create a MySQL user for Drupal.
       community.mysql.mysql_user:
@@ -125,19 +132,20 @@
         creates=/usr/local/bin/composer
 
     - name: Ensure Drupal directory exists.
-      file:
+      ansible.builtin.file:
         path: "{{ drupal_core_path }}"
         state: directory
         owner: www-data
         group: www-data
+        mode: '0750'
 
     - name: Check if Drupal project already exists.
-      stat:
+      ansible.builtin.stat:
         path: "{{ drupal_core_path }}/composer.json"
       register: drupal_composer_json
 
     - name: Create Drupal project.
-      composer:
+      community.general.composer:
         command: create-project
         arguments: drupal/recommended-project "{{ drupal_core_path }}"
         working_dir: "{{ drupal_core_path }}"
@@ -146,7 +154,7 @@
       when: not drupal_composer_json.stat.exists
 
     - name: Add drush to the Drupal site with Composer.
-      composer:
+      community.general.composer:
         command: require
         arguments: drush/drush:11.*
         working_dir: "{{ drupal_core_path }}"
@@ -154,7 +162,7 @@
       when: not drupal_composer_json.stat.exists
 
     - name: Install Drupal.
-      command: >
+      ansible.builtin.command: >
         vendor/bin/drush si -y --site-name="{{ drupal_site_name }}"
         --account-name=admin
         --account-pass=admin
@@ -162,5 +170,5 @@
         --root={{ drupal_core_path }}/web
         chdir={{ drupal_core_path }}
         creates={{ drupal_core_path }}/web/sites/default/settings.php
-      notify: restart apache
+      notify: Restarted Apache.
       become_user: www-data
