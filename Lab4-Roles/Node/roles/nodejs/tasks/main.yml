@@ -1,0 +1,12 @@
+---
+- name: Install Node.js and dependencies.
+  ansible.builtin.dnf:
+    name: npm
+    state: present
+    enablerepo: epel
+
+- name: Install forever module (to run our Node.js app).
+  community.general.npm:
+    name: forever
+    global: yes
+    state: present
