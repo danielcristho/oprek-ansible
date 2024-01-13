@@ -8,5 +8,6 @@
 - name: Install forever module (to run our Node.js app).
   community.general.npm:
     name: forever
-    global: yes
+    global: true
     state: present
+

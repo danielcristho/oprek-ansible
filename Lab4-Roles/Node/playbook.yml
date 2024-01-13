@@ -33,14 +33,16 @@
 
   tasks:
     - name: Ensure Node.js app folder exists.
-      ansible.builtin.file:
+      community.general.ini_file:
         path: "{{ node_apps_location }}"
         state: directory
+        create: false  # prevents creating a file with potentially insecure permissions
 
     - name: Copy example Node.js app to server.
       ansible.builtin.copy:
         src: app
         dest: "{{ node_apps_location }}"
+        mode: preserve
 
     - name: Install app dependencies defined in package.json.
       community.general.npm:
@@ -53,4 +55,4 @@
 
     - name: Start example Node.js app.
       ansible.builtin.command: "/usr/local/bin/forever start {{ node_apps_location }}/app/app.js"
-      when: "forever_list.stdout.find(node_apps_location + '/app/app.js') == -1"
+      changed_when: "forever_list.stdout.find(node_apps_location + '/app/app.js') == -1"
